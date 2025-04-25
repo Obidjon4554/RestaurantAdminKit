@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Restaurant.DataAccess;
+using Restaurant.Mappings;
 using Restaurant.Repositories;
 using System;
 
@@ -11,6 +12,7 @@ builder.Services.AddDbContext<RestaurantContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IMealRepository, MealRepository>();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddAutoMapper(typeof(MealProfile));
 
 
 var app = builder.Build();

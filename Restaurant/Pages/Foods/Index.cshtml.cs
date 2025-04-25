@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Restaurant.DataAccess.Entities;
@@ -8,50 +9,51 @@ namespace Restaurant.Pages.Foods
     public class IndexModel : PageModel
     {
         private readonly IMealRepository _repo;
-
-        public IndexModel(IMealRepository repo)
+        private readonly IMapper _mapper;
+        public IndexModel(IMealRepository repo, IMapper mapper)
         {
             _repo = repo;
+            _mapper = mapper;
         }
 
-        public List<Meal> Meals { get; set; } = new();
+        public List<MealDto> Meals { get; set; } = new();
 
         [BindProperty]
-        public Meal NewMeal { get; set; } = new();
+        public MealDto NewMeal { get; set; } = new();
 
         public async Task OnGetAsync()
         {
-            Meals = await _repo.GetAllAsync();
+            var mealEntities = await _repo.GetAllAsync();
+            Meals = _mapper.Map<List<MealDto>>(mealEntities);
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)
             {
-                Meals = await _repo.GetAllAsync();
+                var mealEntities = await _repo.GetAllAsync();
+                Meals = _mapper.Map<List<MealDto>>(mealEntities);
                 return Page();
             }
 
-            if (NewMeal.Id == 0)
+            var entity = _mapper.Map<Meal>(NewMeal);
+
+            if (entity.Id == 0)
             {
-                // New meal — add it
-                await _repo.AddAsync(NewMeal);
+                await _repo.AddAsync(entity);
             }
             else
             {
-                // Existing meal — update it
-                await _repo.UpdateAsync(NewMeal);
+                await _repo.UpdateAsync(entity);
             }
 
-            return RedirectToPage(); // Clear the form and refresh
+            return RedirectToPage();
         }
-
 
         public async Task<IActionResult> OnPostDeleteAsync(int id)
         {
             await _repo.DeleteAsync(id);
             return RedirectToPage();
         }
-
     }
 }
