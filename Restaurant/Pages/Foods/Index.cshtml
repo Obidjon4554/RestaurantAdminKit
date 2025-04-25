@@ -1,0 +1,132 @@
+﻿@page
+@model Restaurant.Pages.Foods.IndexModel
+@{
+    ViewData["Title"] = "Meals";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-12 col-xl-6">
+
+            <!-- Toggle Add Meal Form Button -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4>Meals</h4>
+                <button class="btn btn-primary" type="button" onclick="toggleAddForm()">Add Meal</button>
+            </div>
+
+            <!-- Add Meal Form (Hidden by default) -->
+            <div id="addMealForm" class="card mb-4 d-none">
+                <div class="card-header">
+                    <h5 class="card-title mb-0" id="formTitle">Add New Meal</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        <div class="mb-3">
+                            <label asp-for="NewMeal.Name" class="form-label">Name</label>
+                            <input asp-for="NewMeal.Name" class="form-control" />
+                            <span asp-validation-for="NewMeal.Name" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="NewMeal.Price" class="form-label">Price</label>
+                            <input asp-for="NewMeal.Price" class="form-control" />
+                            <span asp-validation-for="NewMeal.Price" class="text-danger"></span>
+                        </div>
+                        <input type="hidden" asp-for="NewMeal.Id" />
+                        <button type="submit" class="btn btn-success">Add Meal</button>
+                    </form>
+
+                </div>
+            </div>
+
+
+            <!-- Meals Table -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Meals List</h5>
+                </div>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th style="width:40%;">Name</th>
+                            <th style="width:25%">Price</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Meals)
+                        {
+                            <tr>
+                                <td>@item.Id</td>
+                                <td>@item.Name</td>
+                                <td class="d-none d-md-table-cell">@item.Price</td>
+                                <td class="table-action">
+
+                                    <a href="#" class="me-2" onclick="editMeal(@item.Id, '@item.Name', @item.Price)">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                             fill="none" stroke="currentColor" stroke-width="2"
+                                             stroke-linecap="round" stroke-linejoin="round"
+                                             class="feather feather-edit-2 align-middle">
+                                            <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+                                        </svg>
+                                    </a>
+
+                                    <form method="post" asp-page-handler="Delete" asp-route-id="@item.Id"
+                                          class="d-inline" onsubmit="return confirmDelete('@item.Name')">
+                                        <button type="submit" class="btn btn-link p-0 m-0 align-baseline text-danger" title="Delete">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                                 fill="none" stroke="currentColor" stroke-width="2"
+                                                 stroke-linecap="round" stroke-linejoin="round"
+                                                 class="feather feather-trash align-middle">
+                                                <polyline points="3 6 5 6 21 6"></polyline>
+                                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    function toggleAddForm() {
+        const form = document.getElementById("addMealForm");
+        form.classList.toggle("d-none");
+    }
+    function editMeal(id, name, price) {
+        const form = document.getElementById("addMealForm");
+        const formTitle = document.getElementById("formTitle");
+        const submitBtn = document.getElementById("submitButton");
+
+        formTitle.innerText = "Edit Meal";
+        submitBtn.innerText = "Save Changes";
+
+        // Set the form's values for editing
+        document.getElementById("mealId").value = id;
+        document.getElementById("mealName").value = name;
+        document.getElementById("mealPrice").value = price;
+
+        // Show the form
+        form.classList.remove("d-none");
+    }
+    function confirmDelete(mealName) {
+        return confirm(`Are you sure you want to delete the meal: "${mealName}"?`);
+    }
+
+    function editMeal(id, name, price) {
+        document.querySelector('input[name="NewMeal.Id"]').value = id;
+        document.querySelector('input[name="NewMeal.Name"]').value = name;
+        document.querySelector('input[name="NewMeal.Price"]').value = price;
+
+        document.getElementById("addMealForm").classList.remove("d-none");
+    }
+
+</script>
